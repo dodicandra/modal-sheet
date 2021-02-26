@@ -1,0 +1,39 @@
+{
+  "main": "lib/Modal",
+  "name": "modal-sheet",
+  "version": "1.0.0",
+  "typings": "lib/Modal.d.ts",
+  "license": "MIT",
+  "author": "Dodi candra <dodicandra20@gmail.com> (https://github.com/dodicandra)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dodicandra/modal-sheet.git"
+  },
+  "homepage": "https://github.com/dodicandra/modal-sheet.git/blob/master/README.md",
+  "scripts": {
+    "clr": "rm -rf lib",
+    "build": "yarn clr && yarn tsc -p ."
+  },
+  "devDependencies": {
+    "@babel/core": "~7.9.0",
+    "@types/react": "~16.9.35",
+    "@types/react-dom": "~16.9.8",
+    "@types/react-native": "~0.63.2",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-native": "0.63",
+    "typescript": "~4.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.13.1",
+    "react-native": ">=0.63"
+  },
+  "keywords": [
+    "modal",
+    "react-native-modal",
+    "modal-sheets",
+    "react-native-modal",
+    "react-native-modal-sheets",
+    "react-native-modal"
+  ]
+}
