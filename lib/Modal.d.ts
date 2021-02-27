@@ -4,5 +4,16 @@ declare type Props = {
     close: (val: boolean) => void;
     size?: 's' | 'm' | 'l';
 };
-declare const Modal: React.FC<Props>;
+interface ModalMethod {
+    close(): void;
+    open(): void;
+}
+declare class Modal extends React.Component<Pick<Props, 'size'>, {
+    visible: boolean;
+}> implements ModalMethod {
+    constructor(props: Readonly<Props> | Props);
+    close(): void;
+    open(): void;
+    render(): JSX.Element;
+}
 export default Modal;

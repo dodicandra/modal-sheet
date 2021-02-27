@@ -10,15 +10,31 @@ using npm : `npm i modal-sheet`
 ```JSX
 import Modal from 'modal-sheet';
 
+const ref = useRef(null)
+
+const onOpen = () => ref.current.open()
+
+const onClose = () => ref.current.close()
+
 // ...
-<Modal size="m" visible={shown} close={onClose}>
+<Modal ref={ref} size="m">
   {children}
 </Modal>
 // ...
 ```
 
-| Props   | Require | Description                                       |
-| ------- | ------- | ------------------------------------------------- |
-| visible | yes     | show/hide modal                                   |
-| close   | yes     | callback for close modal `(bol)=>setVisible(bol)` |
-| size    | no      | `"s"`, `"m"` ,`"l"`                               |
+## Props
+
+| Props | Require | Description         |
+| ----- | ------- | ------------------- |
+| size  | no      | `"s"`, `"m"` ,`"l"` |
+
+## Methods
+
+### `open()`
+
+Open Modal
+
+### `close()`
+
+Close Modal

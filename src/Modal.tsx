@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 import {
   useWindowDimensions, Animated, Dimensions,
-  KeyboardAvoidingView, Modal as RnModal, PanResponder,
+  KeyboardAvoidingView, Modal as RNModal, PanResponder,
   StyleSheet, TouchableOpacity, View,
 } from 'react-native';
 
@@ -14,7 +14,7 @@ type Props = {
   size?: 's' | 'm' | 'l';
 };
 
-const Modal: React.FC<Props> = ({ ...props }) => {
+const ModalCustom: React.FC<Props> = ({ ...props }) => {
   const panAnimated = useRef(new Animated.ValueXY()).current;
   const { height: H } = useWindowDimensions();
   const height = props.size === 'l' ? H * 0.7 : props.size === 's' ? H * 0.3 : H * 0.4;
@@ -51,7 +51,7 @@ const Modal: React.FC<Props> = ({ ...props }) => {
   }, [props.visible]);
 
   return (
-    <RnModal
+    <RNModal
       pointerEvents="none"
       collapsable={true}
       needsOffscreenAlphaCompositing={true}
@@ -91,9 +91,37 @@ const Modal: React.FC<Props> = ({ ...props }) => {
           </Animated.View>
         </TouchableOpacity>
       </KeyboardAvoidingView>
-    </RnModal>
+    </RNModal>
   );
 };
+
+interface ModalMethod {
+  close(): void;
+  open(): void;
+}
+
+class Modal extends React.Component<Pick<Props, 'size'>, { visible: boolean }> implements ModalMethod {
+  constructor(props: Readonly<Props> | Props) {
+    super(props);
+    this.state = {
+      visible: false,
+    };
+  }
+
+  close(): void {
+    this.setState({ visible: false });
+  }
+
+  open(): void {
+    this.setState({ visible: true });
+  }
+
+  render() {
+    return (
+      <ModalCustom close={() => this.close()} visible={this.state.visible} size={this.props.size} {...this.props} />
+    );
+  }
+}
 
 export default Modal;
 
