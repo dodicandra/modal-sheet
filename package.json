@@ -1,7 +1,7 @@
 {
   "main": "lib/Modal",
   "name": "modal-sheet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "typings": "lib/Modal.d.ts",
   "license": "MIT",
   "author": "Dodi candra <dodicandra20@gmail.com> (https://github.com/dodicandra)",
