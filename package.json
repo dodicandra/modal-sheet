@@ -4,12 +4,12 @@
   "version": "1.1.0",
   "typings": "lib/Modal.d.ts",
   "license": "MIT",
-  "author": "Dodi candra <dodicandra20@gmail.com> (https://github.com/dodicandra)",
+  "author": "Dodi candra <cekiddot@gmail.com> (https://github.com/dodicandra)",
   "repository": {
     "type": "git",
     "url": "https://github.com/dodicandra/modal-sheet.git"
   },
-  "homepage": "https://github.com/dodicandra/modal-sheet.git/blob/master/README.md",
+  "homepage": "https://github.com/dodicandra/modal-sheet",
   "scripts": {
     "clr": "rm -rf lib",
     "build": "yarn clr && yarn tsc -p ."

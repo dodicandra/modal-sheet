@@ -1,6 +1,8 @@
 ## React Native Modal sheets
 
-### install
+### Simple react native modal sheet
+
+#### Install
 
 using yarn : `yarn add modal-sheet` <br>
 using npm : `npm i modal-sheet`
