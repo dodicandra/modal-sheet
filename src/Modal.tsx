@@ -16,7 +16,7 @@ type Props = {
 
 const ModalCustom: React.FC<Props> = ({ ...props }) => {
   const panAnimated = useRef(new Animated.ValueXY()).current;
-  const { height: H } = useWindowDimensions();
+  const { height: H, width } = useWindowDimensions();
   const height = props.size === 'l' ? H * 0.7 : props.size === 's' ? H * 0.3 : H * 0.4;
   const panrespon = useRef(
     PanResponder.create({
@@ -74,7 +74,7 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
             pointerEvents="auto"
             collapsable={true}
             needsOffscreenAlphaCompositing={true}
-            style={[styles.modal, { height, transform: [{ translateY: panAnimated.y }] }]}
+            style={[styles.modal, { height, width, transform: [{ translateY: panAnimated.y }] }]}
             renderToHardwareTextureAndroid
             removeClippedSubviews
           >
@@ -127,7 +127,6 @@ export default Modal;
 
 const styles = StyleSheet.create({
   modal: {
-    width: width,
     backgroundColor: 'white',
     borderTopEndRadius: 15,
     borderTopStartRadius: 15,
