@@ -2,7 +2,7 @@ import React from 'react';
 declare type Props = {
     visible: boolean;
     close: (val: boolean) => void;
-    size?: 's' | 'm' | 'l';
+    size?: 's' | 'm' | 'l' | 'xl';
 };
 interface ModalMethod {
     close(): void;

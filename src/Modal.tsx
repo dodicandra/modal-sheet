@@ -1,9 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 
 import {
-  useWindowDimensions, Animated, Dimensions,
-  KeyboardAvoidingView, Modal as RNModal, PanResponder,
-  StyleSheet, TouchableOpacity, View,
+  Animated,
+  Dimensions,
+  KeyboardAvoidingView,
+  Modal as RNModal,
+  PanResponder,
+  StyleSheet,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -11,13 +17,33 @@ const { width } = Dimensions.get('window');
 type Props = {
   visible: boolean;
   close: (val: boolean) => void;
-  size?: 's' | 'm' | 'l';
+  size?: 's' | 'm' | 'l' | 'xl';
 };
 
 const ModalCustom: React.FC<Props> = ({ ...props }) => {
   const panAnimated = useRef(new Animated.ValueXY()).current;
   const { height: H, width } = useWindowDimensions();
-  const height = props.size === 'l' ? H * 0.7 : props.size === 's' ? H * 0.3 : H * 0.4;
+  let height = H * 0.3;
+
+  switch (props.size) {
+    case 's':
+      height = H * 0.3;
+      break;
+    case 'm':
+      height = H * 0.5;
+      break;
+    case 'l':
+      height = H * 0.6;
+      break;
+    case 'xl':
+      height = H * 0.7;
+      break;
+    default:
+      height = H * 0.3;
+      break;
+  }
+
+  props.size === 'l' ? H * 0.7 : props.size === 's' ? H * 0.3 : H * 0.4;
   const panrespon = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
