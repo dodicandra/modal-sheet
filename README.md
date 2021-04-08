@@ -25,9 +25,9 @@ const onClose = () => ref.current.close()
 
 ## Props
 
-| Props | Require | Description         |
-| ----- | ------- | ------------------- |
-| size  | no      | `"s"`, `"m"` ,`"l"` |
+| Props | Require | Description                  |
+| ----- | ------- | ---------------------------- |
+| size  | no      | `"s"`, `"m"` ,`"l"` , `"xl"` |
 
 ## Methods
 

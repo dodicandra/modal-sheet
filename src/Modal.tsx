@@ -43,7 +43,6 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
       break;
   }
 
-  props.size === 'l' ? H * 0.7 : props.size === 's' ? H * 0.3 : H * 0.4;
   const panrespon = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
