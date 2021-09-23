@@ -1,7 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 
 import {
   Animated,
+  ColorValue,
   Dimensions,
   KeyboardAvoidingView,
   Modal as RNModal,
@@ -10,24 +17,35 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  ViewProps,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const dimension = Dimensions.get('window');
 
-type Props = {
-  visible: boolean;
-  close: (val: boolean) => void;
+interface Modal {
+  close(): void;
+  open(): void;
+}
+export interface ModalProps {
   size?: 's' | 'm' | 'l' | 'xl';
-};
+  dragColor?: ColorValue;
+  dragShadowColor?: ColorValue;
+  disableDrag?: boolean;
+  onClosed?(): void;
+  children: (() => React.ReactNode) | React.ReactNode[] | React.ReactNode;
+}
 
-const ModalCustom: React.FC<Props> = ({ ...props }) => {
+const ModalComponent = forwardRef<Modal, ModalProps>(({ ...props }, ref) => {
   const panAnimated = useRef(new Animated.ValueXY()).current;
   const { height: H, width } = useWindowDimensions();
+
+  const [visible, setVisible] = React.useState(false);
+
   let height = H * 0.3;
 
   switch (props.size) {
     case 's':
-      height = H * 0.3;
+      height = H * 0.36;
       break;
     case 'm':
       height = H * 0.5;
@@ -39,9 +57,13 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
       height = H * 0.7;
       break;
     default:
-      height = H * 0.3;
+      height = H * 0.36;
       break;
   }
+
+  const onClose = useCallback((val: boolean) => {
+    setVisible(val);
+  }, []);
 
   const panrespon = useRef(
     PanResponder.create({
@@ -53,7 +75,7 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
       },
       onPanResponderRelease: (e, gesture) => {
         if (gesture.dy > 160) {
-          onClose();
+          onClose(false);
         } else {
           Animated.spring(panAnimated, {
             toValue: { x: 0, y: 0 },
@@ -65,15 +87,16 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
     })
   ).current;
 
-  const onClose = () => {
-    return props.close?.(false);
-  };
-
   useEffect(() => {
-    if (props.visible === true) {
+    if (visible === true) {
       Animated.spring(panAnimated, { toValue: { x: 0, y: 0 }, useNativeDriver: false, speed: 3 }).start();
     }
-  }, [props.visible]);
+  }, [visible]);
+
+  useImperativeHandle(ref, () => ({
+    open: () => onClose(true),
+    close: () => onClose(false),
+  }));
 
   return (
     <RNModal
@@ -83,8 +106,9 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
       removeClippedSubviews
       transparent
       animationType="slide"
-      visible={props.visible}
-      onRequestClose={onClose}
+      onDismiss={props.onClosed}
+      visible={visible}
+      onRequestClose={() => onClose(false)}
     >
       <KeyboardAvoidingView
         removeClippedSubviews
@@ -94,7 +118,7 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
         style={{ flex: 1 }}
         pointerEvents="auto"
       >
-        <TouchableOpacity touchSoundDisabled={true} activeOpacity={1} style={styles.content}>
+        <View style={styles.content}>
           <Animated.View
             pointerEvents="auto"
             collapsable={true}
@@ -104,9 +128,9 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
             removeClippedSubviews
           >
             <View pointerEvents="auto" {...panrespon.panHandlers}>
-              <TouchableOpacity activeOpacity={1}>
-                <View pointerEvents="auto" style={styles.drag}>
-                  <View style={styles.dgragIcon} />
+              <TouchableOpacity activeOpacity={1} disabled={props.disableDrag}>
+                <View pointerEvents="auto" style={[styles.drag, { shadowColor: props.dragShadowColor ?? '#000' }]}>
+                  <View style={[styles.dgragIcon, { backgroundColor: props.dragColor }]} />
                 </View>
               </TouchableOpacity>
             </View>
@@ -114,39 +138,13 @@ const ModalCustom: React.FC<Props> = ({ ...props }) => {
               {props.children}
             </View>
           </Animated.View>
-        </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </RNModal>
   );
-};
+});
 
-interface ModalMethod {
-  close(): void;
-  open(): void;
-}
-
-class Modal extends React.Component<Pick<Props, 'size'>, { visible: boolean }> implements ModalMethod {
-  constructor(props: Readonly<Props> | Props) {
-    super(props);
-    this.state = {
-      visible: false,
-    };
-  }
-
-  close(): void {
-    this.setState({ visible: false });
-  }
-
-  open(): void {
-    this.setState({ visible: true });
-  }
-
-  render() {
-    return (
-      <ModalCustom close={() => this.close()} visible={this.state.visible} size={this.props.size} {...this.props} />
-    );
-  }
-}
+const Modal = React.memo(ModalComponent);
 
 export default Modal;
 
@@ -157,7 +155,7 @@ const styles = StyleSheet.create({
     borderTopStartRadius: 15,
     overflow: 'hidden',
   },
-  content: { backgroundColor: 'rgba(0,0,0,0.3)', flex: 1, justifyContent: 'flex-end' },
+  content: { backgroundColor: 'rgba(0,0,0,0.7)', flex: 1, justifyContent: 'flex-end' },
   wraper: {
     backgroundColor: 'white',
     width: '100%',
@@ -170,7 +168,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
+    shadowOffset: { width: 1, height: 2 },
+    shadowRadius: 2.4,
+    shadowOpacity: 0.2,
   },
-  dgragIcon: { width: 80, height: 12, elevation: 4, backgroundColor: 'white', borderRadius: 8 },
-  childrenContainer: { flex: 1, width: width * 0.98, height: '100%', marginVertical: 6, overflow: 'hidden' },
+  dgragIcon: { width: 50, height: 5, borderRadius: 8 },
+  childrenContainer: { flex: 1, width: dimension.width * 0.98, height: '100%', marginVertical: 6, overflow: 'hidden' },
 });

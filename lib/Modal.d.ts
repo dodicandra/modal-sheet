@@ -1,19 +1,16 @@
 import React from 'react';
-declare type Props = {
-    visible: boolean;
-    close: (val: boolean) => void;
+import { ColorValue } from 'react-native';
+interface Modal {
+    close(): void;
+    open(): void;
+}
+export interface ModalProps {
     size?: 's' | 'm' | 'l' | 'xl';
-};
-interface ModalMethod {
-    close(): void;
-    open(): void;
+    dragColor?: ColorValue;
+    dragShadowColor?: ColorValue;
+    disableDrag?: boolean;
+    onClosed?(): void;
+    children: (() => React.ReactNode) | React.ReactNode[] | React.ReactNode;
 }
-declare class Modal extends React.Component<Pick<Props, 'size'>, {
-    visible: boolean;
-}> implements ModalMethod {
-    constructor(props: Readonly<Props> | Props);
-    close(): void;
-    open(): void;
-    render(): JSX.Element;
-}
+declare const Modal: React.MemoExoticComponent<React.ForwardRefExoticComponent<ModalProps & React.RefAttributes<Modal>>>;
 export default Modal;
