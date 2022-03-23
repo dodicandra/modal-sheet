@@ -1,49 +1,35 @@
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 
 import {
   Animated,
   ColorValue,
-  Dimensions,
   KeyboardAvoidingView,
   Modal as RNModal,
   PanResponder,
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
-  View,
-  ViewProps,
+  View
 } from 'react-native';
-
-const dimension = Dimensions.get('window');
 
 interface Modal {
   close(): void;
   open(): void;
 }
+
 export interface ModalProps {
-  size?: 's' | 'm' | 'l' | 'xl';
+  size?: 's' | 'm' | 'l' | 'xl' | 'full';
   dragColor?: ColorValue;
   dragShadowColor?: ColorValue;
   disableDrag?: boolean;
+  backDropColor?: string;
   onClosed?(): void;
-  children: (() => React.ReactNode) | React.ReactNode[] | React.ReactNode;
 }
 
-const ModalComponent = forwardRef<Modal, ModalProps>(({ ...props }, ref) => {
-  const panAnimated = useRef(new Animated.ValueXY()).current;
-  const { height: H, width } = useWindowDimensions();
-
-  const [visible, setVisible] = React.useState(false);
-
+function getHeight(size: ModalProps['size'], H: number) {
   let height = H * 0.3;
 
-  switch (props.size) {
+  switch (size) {
     case 's':
       height = H * 0.36;
       break;
@@ -56,93 +42,140 @@ const ModalComponent = forwardRef<Modal, ModalProps>(({ ...props }, ref) => {
     case 'xl':
       height = H * 0.7;
       break;
+    case 'full':
+      height = H - 20;
+      break;
     default:
       height = H * 0.36;
       break;
   }
+  return height;
+}
 
-  const onClose = useCallback((val: boolean) => {
-    setVisible(val);
-  }, []);
+const ModalComponent = forwardRef<Modal, React.PropsWithChildren<ModalProps>>(
+  ({ backDropColor = '', disableDrag = false, onClosed, size, dragShadowColor, dragColor, children }, ref) => {
+    const panAnimated = useRef(new Animated.ValueXY()).current;
+    const backgroundColor = useRef(new Animated.Value(0)).current;
 
-  const panrespon = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (e, g) => {
-        if (g.dy > 0) {
-          Animated.event([null, { dy: panAnimated.y }], { useNativeDriver: false })(e, g);
+    const { height: H, width } = useWindowDimensions();
+    const height = useMemo(() => getHeight(size, H), [H, size]);
+
+    const [visible, setVisible] = React.useState(false);
+
+    const onClose = useCallback(() => {
+      Animated.timing(backgroundColor, { toValue: 0, duration: 300, useNativeDriver: false }).start(() => {
+        onClosed?.();
+        setVisible(() => false);
+      });
+    }, [backgroundColor, onClosed]);
+
+    const onOpen = useCallback(() => {
+      setVisible(() => true);
+    }, []);
+
+    const onShow = useCallback(() => {
+      Animated.timing(backgroundColor, { toValue: 1, useNativeDriver: false, duration: 300, delay: 200 }).start();
+    }, [backgroundColor]);
+
+    const panrespon = useRef(
+      PanResponder.create({
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderMove: (e, g) => {
+          if (g.dy > 0) {
+            Animated.event([null, { dy: panAnimated.y }], { useNativeDriver: false })(e, g);
+          }
+        },
+        onPanResponderRelease: (e, gesture) => {
+          if (gesture.dy > 160) {
+            onClose();
+          } else {
+            Animated.spring(panAnimated, {
+              toValue: { x: 0, y: 0 },
+              useNativeDriver: false,
+              speed: 30
+            }).start();
+          }
         }
-      },
-      onPanResponderRelease: (e, gesture) => {
-        if (gesture.dy > 160) {
-          onClose(false);
-        } else {
-          Animated.spring(panAnimated, {
-            toValue: { x: 0, y: 0 },
-            useNativeDriver: false,
-            speed: 30,
-          }).start();
-        }
-      },
-    })
-  ).current;
+      })
+    ).current;
 
-  useEffect(() => {
-    if (visible === true) {
-      Animated.spring(panAnimated, { toValue: { x: 0, y: 0 }, useNativeDriver: false, speed: 3 }).start();
-    }
-  }, [visible]);
+    const bgColorMemo = useMemo(
+      () =>
+        backgroundColor.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['transparent', backDropColor || 'rgba(0,0,0,0.7)']
+        }),
+      [backDropColor, backgroundColor]
+    );
 
-  useImperativeHandle(ref, () => ({
-    open: () => onClose(true),
-    close: () => onClose(false),
-  }));
+    useEffect(() => {
+      if (visible === true) {
+        Animated.spring(panAnimated, { toValue: { x: 0, y: 0 }, useNativeDriver: false, speed: 3 }).start();
+      }
+    }, [panAnimated, visible]);
 
-  return (
-    <RNModal
-      pointerEvents="none"
-      collapsable={true}
-      needsOffscreenAlphaCompositing={true}
-      removeClippedSubviews
-      transparent
-      animationType="slide"
-      onDismiss={props.onClosed}
-      visible={visible}
-      onRequestClose={() => onClose(false)}
-    >
-      <KeyboardAvoidingView
-        removeClippedSubviews
-        renderToHardwareTextureAndroid
-        enabled={true}
-        behavior="padding"
-        style={{ flex: 1 }}
-        pointerEvents="auto"
-      >
-        <View style={styles.content}>
-          <Animated.View
-            pointerEvents="auto"
-            collapsable={true}
-            needsOffscreenAlphaCompositing={true}
-            style={[styles.modal, { height, width, transform: [{ translateY: panAnimated.y }] }]}
-            renderToHardwareTextureAndroid
-            removeClippedSubviews
-          >
-            <View pointerEvents="auto" {...panrespon.panHandlers}>
-              <TouchableOpacity activeOpacity={1} disabled={props.disableDrag}>
-                <View pointerEvents="auto" style={[styles.drag, { shadowColor: props.dragShadowColor ?? '#000' }]}>
-                  <View style={[styles.dgragIcon, { backgroundColor: props.dragColor }]} />
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={{ flex: 1 }} pointerEvents="auto" collapsable={true} needsOffscreenAlphaCompositing={true}>
-              {props.children}
-            </View>
-          </Animated.View>
-        </View>
-      </KeyboardAvoidingView>
-    </RNModal>
-  );
-});
+    useImperativeHandle(
+      ref,
+      () => ({
+        open: onOpen,
+        close: onClose
+      }),
+      [onClose, onOpen]
+    );
+
+    return (
+      <RNModal
+        pointerEvents="none"
+        collapsable={true}
+        statusBarTranslucent
+        needsOffscreenAlphaCompositing={true}
+        transparent
+        animationType="slide"
+        onShow={onShow}
+        visible={visible}
+        onRequestClose={onClose}>
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: bgColorMemo
+            }
+          ]}
+        />
+        <KeyboardAvoidingView
+          removeClippedSubviews
+          renderToHardwareTextureAndroid
+          enabled={true}
+          behavior="padding"
+          style={{ flex: 1 }}
+          pointerEvents="auto">
+          <TouchableOpacity touchSoundDisabled={true} disabled={disableDrag} activeOpacity={1} style={styles.content}>
+            <Animated.View
+              pointerEvents="auto"
+              collapsable={true}
+              needsOffscreenAlphaCompositing={true}
+              style={[styles.modal, { height, width, transform: [{ translateY: panAnimated.y }] }]}
+              renderToHardwareTextureAndroid
+              removeClippedSubviews>
+              <View pointerEvents="auto" {...panrespon.panHandlers}>
+                <TouchableOpacity activeOpacity={1} disabled={disableDrag}>
+                  <View
+                    pointerEvents="auto"
+                    style={[styles.drag, { shadowColor: dragShadowColor ? dragShadowColor : '#000' }]}>
+                    <View style={[styles.dgragIcon, { backgroundColor: dragColor }]} />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={{ flex: 1 }} pointerEvents="auto" collapsable={true} needsOffscreenAlphaCompositing={true}>
+                {children}
+              </View>
+            </Animated.View>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
+      </RNModal>
+    );
+  }
+);
 
 const Modal = React.memo(ModalComponent);
 
@@ -153,14 +186,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopEndRadius: 15,
     borderTopStartRadius: 15,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
-  content: { backgroundColor: 'rgba(0,0,0,0.7)', flex: 1, justifyContent: 'flex-end' },
+  content: { flex: 1, justifyContent: 'flex-end' },
   wraper: {
     backgroundColor: 'white',
     width: '100%',
     borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopRightRadius: 20
   },
   drag: {
     backgroundColor: 'transparent',
@@ -170,8 +203,7 @@ const styles = StyleSheet.create({
     padding: 10,
     shadowOffset: { width: 1, height: 2 },
     shadowRadius: 2.4,
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.2
   },
-  dgragIcon: { width: 50, height: 5, borderRadius: 8 },
-  childrenContainer: { flex: 1, width: dimension.width * 0.98, height: '100%', marginVertical: 6, overflow: 'hidden' },
+  dgragIcon: { width: 50, height: 5, borderRadius: 8 }
 });
