@@ -1,32 +1,41 @@
 {
-  "main": "lib/Modal",
   "name": "modal-sheet",
-  "version": "1.4.0",
-  "typings": "lib/Modal.d.ts",
+  "version": "1.4.6",
   "license": "MIT",
   "author": "Dodi candra <cekiddot@gmail.com> (https://github.com/dodicandra)",
+  "main": "dist/commonjs/index.js",
+  "react-native": "src/index.tsx",
+  "module": "dist/module/index.js",
+  "types": "dist/typescript/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/dodicandra/modal-sheet.git"
   },
   "homepage": "https://github.com/dodicandra/modal-sheet",
   "scripts": {
-    "clr": "rm -rf lib",
-    "build": "yarn clr && yarn tsc -p .",
-    "prepare": "yarn build"
+    "clr": "rm -rf dist",
+    "prepare": "yarn clr && bob build"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
-    "@dodicandra/eslint-config-rn": "^1.0.1",
-    "@types/react": "~16.9.35",
-    "@types/react-dom": "~16.9.8",
-    "@types/react-native": "0.67.3",
+    "@dodicandra/eslint-config-rn": "^1.0.2",
+    "@types/react": "17.0.1",
+    "@types/react-native": "0.67.4",
     "eslint": "7.14.0",
     "prettier": "2.3.0",
-    "react": "16.13.1",
-    "react-dom": "16.13.1",
-    "react-native": "0.63",
-    "typescript": "^4.6.2"
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-native": "0.64.3",
+    "react-native-builder-bob": "^0.18.2",
+    "typescript": "^4.6.3"
   },
   "peerDependencies": {
     "react": ">=16.13.1",
@@ -39,5 +48,18 @@
     "react-native-modal",
     "react-native-modal-sheets",
     "react-native-modal"
+  ],
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "dist",
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "dist/"
   ]
 }

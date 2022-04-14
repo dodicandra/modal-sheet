@@ -1,26 +1,18 @@
 {
   "extends": "@dodicandra/eslint-config-rn",
   "compilerOptions": {
-    "target": "ES2015",
-    "module": "ES6",
-    "lib": ["ES2015", "ES2016"],
-    "jsx": "react-native",
-    "declaration": true,
-    "noEmit": false,
-    "outDir": "lib",
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "moduleResolution": "node",
-    "downlevelIteration": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "noImplicitThis": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "noStrictGenericChecks": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "strict": true,
+    "noEmit": false
   },
   "include": ["src"],
-  "exclude": ["node_modules"]
+  "exclude": ["./node_modules", "./dist"]
 }
