@@ -1,10 +1,10 @@
 {
   "name": "modal-sheet",
-  "version": "1.4.6",
+  "version": "1.4.10",
   "license": "MIT",
   "author": "Dodi candra <cekiddot@gmail.com> (https://github.com/dodicandra)",
   "main": "dist/commonjs/index.js",
-  "react-native": "src/index.tsx",
+  "react-native": "src/index.ts",
   "module": "dist/module/index.js",
   "types": "dist/typescript/index.d.ts",
   "files": [

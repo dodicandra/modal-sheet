@@ -18,18 +18,22 @@ interface Modal {
 }
 
 export interface ModalProps {
-  size?: 's' | 'm' | 'l' | 'xl' | 'full';
+  size?: 'xs' | 's' | 'm' | 'l' | 'xl' | 'full';
   dragColor?: ColorValue;
   dragShadowColor?: ColorValue;
   disableDrag?: boolean;
   backDropColor?: string;
   onClosed?(): void;
+  innerKey?: React.Key;
 }
 
 function getHeight(size: ModalProps['size'], H: number) {
   let height = H * 0.3;
 
   switch (size) {
+    case 'xs':
+      height = H * 0.25;
+      break;
     case 's':
       height = H * 0.36;
       break;
@@ -52,8 +56,8 @@ function getHeight(size: ModalProps['size'], H: number) {
   return height;
 }
 
-const ModalComponent: React.ForwardRefRenderFunction<Modal, ModalProps> = (props, ref) => {
-  const { backDropColor = '', disableDrag = false, onClosed, size, dragShadowColor, dragColor, children } = props;
+const ModalComponent: React.ForwardRefRenderFunction<Modal, React.PropsWithChildren<ModalProps>> = (props, ref) => {
+  const { backDropColor = '', disableDrag = false, onClosed, size, dragShadowColor, dragColor, children, innerKey } = props;
 
   const panAnimated = useRef(new Animated.ValueXY()).current;
   const backgroundColor = useRef(new Animated.Value(0)).current;
@@ -87,7 +91,7 @@ const ModalComponent: React.ForwardRefRenderFunction<Modal, ModalProps> = (props
         }
       },
       onPanResponderRelease: (_e, gesture) => {
-        if (gesture.dy > 160) {
+        if (gesture.dy > height / 2.5) {
           onClose();
         } else {
           Animated.spring(panAnimated, {
@@ -126,6 +130,7 @@ const ModalComponent: React.ForwardRefRenderFunction<Modal, ModalProps> = (props
 
   return (
     <RNModal
+      key={innerKey}
       pointerEvents="none"
       collapsable={true}
       statusBarTranslucent
